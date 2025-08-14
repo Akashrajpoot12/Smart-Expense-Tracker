@@ -1,0 +1,34 @@
+# Compiled executables
+*.exe
+*.out
+
+# User data files
+*.csv
+expenses.csv
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Local development files
+compile.bat
+run.bat
+
+# Old C++ files (keeping only web version)
+main.cpp
+main_simple.cpp
+
+# Temporary files
+*.tmp
+*.temp 

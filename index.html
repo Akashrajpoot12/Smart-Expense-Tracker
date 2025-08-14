@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 Smart Personal Expense Tracker</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-wallet me-2 pulse"></i>
+                <span class="glow">Smart Expense Tracker</span>
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text float me-3">
+                    <i class="fas fa-calendar me-1"></i>
+                    <span id="currentDate"></span>
+                </span>
+                <button class="btn btn-outline-light btn-sm" onclick="showProfileModal()" title="Manage user profile" id="profileButton">
+                    <img id="profileButtonImage" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIGZpbGw9ImN1cnJlbnRDb2xvciIgY2xhc3M9ImJpIGJpLXBlcnNvbiIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBkPSJNOCA4YTMgMyAwIDEgMSAwLTYgMyAzIDAgMCAxIDAgNnptMCAxYzIuNjcgMCA4IDEuMzQgOCA0djFIMFYxM2MwLTIuNjYgNS4zMy00IDgtNHoiLz4KPC9zdmc+" alt="Profile">
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 col-md-4">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-pie me-2 pulse"></i>Quick Stats</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="stat-item">
+                                    <h4 id="totalExpenses" class="text-primary">₹0</h4>
+                                    <small class="text-muted">Total Spent</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-item">
+                                    <h4 id="monthlySpent" class="text-warning">₹0</h4>
+                                    <small class="text-muted">This Month</small>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="budget-info">
+                            <h6>Monthly Budget</h6>
+                            <div class="input-group input-group-sm">
+                                <input type="number" id="monthlyBudget" class="form-control" value="15000" min="0" step="100">
+                                <button class="btn btn-outline-primary btn-sm" onclick="updateBudget()">
+                                    <i class="fas fa-save"></i>
+                                </button>
+                            </div>
+                            <div class="progress mt-2" style="height: 8px;">
+                                <div id="budgetProgress" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small class="text-muted" id="budgetStatus">Under Budget</small>
+                        </div>
+                    </div>
+                </div>
+
+                                 <!-- Category Summary -->
+                 <div class="card mt-3">
+                     <div class="card-header bg-info text-white">
+                         <h6 class="mb-0"><i class="fas fa-tags me-2 pulse"></i>Top Categories</h6>
+                     </div>
+                     <div class="card-body">
+                         <div id="categorySummary">
+                             <p class="text-muted text-center">No expenses yet</p>
+                         </div>
+                     </div>
+                 </div>
+
+                 <!-- Loan Summary -->
+                 <div class="card mt-3">
+                     <div class="card-header bg-warning text-dark">
+                         <h6 class="mb-0"><i class="fas fa-handshake me-2 pulse"></i>Loan Summary</h6>
+                     </div>
+                     <div class="card-body">
+                         <div class="row text-center">
+                             <div class="col-6">
+                                 <div class="stat-item">
+                                     <h5 id="totalGiven" class="text-danger">₹0</h5>
+                                     <small class="text-muted">Given</small>
+                                 </div>
+                             </div>
+                             <div class="col-6">
+                                 <div class="stat-item">
+                                     <h5 id="totalTaken" class="text-success">₹0</h5>
+                                     <small class="text-muted">Taken</small>
+                                 </div>
+                             </div>
+                         </div>
+                         <hr>
+                         <div class="text-center">
+                             <h6 id="netLoan" class="text-primary">Net: ₹0</h6>
+                             <small class="text-muted">(Positive = You owe, Negative = You're owed)</small>
+                         </div>
+                     </div>
+                 </div>
+
+                 <!-- User Profile Summary -->
+                 <div class="card mt-3">
+                     <div class="card-header bg-info text-white">
+                         <h6 class="mb-0"><i class="fas fa-user me-2 pulse"></i>User Profile</h6>
+                     </div>
+                     <div class="card-body">
+                         <div id="profileSummary">
+                             <div class="text-center">
+                                 <i class="fas fa-user-circle fa-3x text-muted mb-2"></i>
+                                 <p class="text-muted">No profile set</p>
+                                 <button class="btn btn-outline-info btn-sm" onclick="showProfileModal()">
+                                     <i class="fas fa-plus me-1"></i>Create Profile
+                                 </button>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9 col-md-8">
+                <!-- Action Buttons -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-primary" onclick="showAddExpenseModal()">
+                                <i class="fas fa-plus me-2"></i>Add Expense
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="showSearchModal()">
+                                <i class="fas fa-search me-2"></i>Search
+                            </button>
+                            <button class="btn btn-outline-info" onclick="showReportsModal()">
+                                <i class="fas fa-chart-bar me-2"></i>Reports
+                            </button>
+                                                         <button class="btn btn-outline-success" onclick="showSelectiveExportModal()">
+                                 <i class="fas fa-download me-2"></i>Export
+                             </button>
+                             <button class="btn btn-outline-warning" onclick="showBillUploadModal()" title="Upload bill image">
+                                 <i class="fas fa-file-upload me-2"></i>Bill Upload
+                             </button>
+                             <button class="btn btn-outline-danger" onclick="clearAllData()" title="Clear all expenses">
+                                 <i class="fas fa-trash me-2"></i>Clear All
+                             </button>
+                             <button class="btn btn-outline-primary" onclick="showLoanModal()" title="Manage loans/udhar">
+                                 <i class="fas fa-handshake me-2"></i>Loans
+                             </button>
+                         </div>
+                    </div>
+                </div>
+
+                <!-- Expenses Table -->
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-list me-2 pulse"></i>All Expenses</h5>
+                            <div class="d-flex gap-2">
+                                <select id="sortBy" class="form-select form-select-sm" onchange="sortExpenses()">
+                                    <option value="date-desc">Date (Newest)</option>
+                                    <option value="date-asc">Date (Oldest)</option>
+                                    <option value="amount-desc">Amount (High-Low)</option>
+                                    <option value="amount-asc">Amount (Low-High)</option>
+                                    <option value="category">Category</option>
+                                </select>
+                                <select id="filterCategory" class="form-select form-select-sm" onchange="filterExpenses()">
+                                    <option value="">All Categories</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Category</th>
+                                        <th>Description</th>
+                                        <th>Amount</th>
+                                        <th>Bill</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="expensesTableBody">
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted">
+                                            <i class="fas fa-inbox fa-2x mb-2"></i><br>
+                                            No expenses recorded yet.<br>
+                                            <button class="btn btn-primary btn-sm mt-2" onclick="showAddExpenseModal()">
+                                                Add Your First Expense
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Expense Modal -->
+    <div class="modal fade" id="addExpenseModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-plus me-2"></i>Add New Expense</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addExpenseForm">
+                        <div class="mb-3">
+                            <label for="expenseDate" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="expenseDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="expenseCategory" class="form-label">Category</label>
+                            <select class="form-select" id="expenseCategory" required onchange="handleCategoryChange()">
+                                <option value="">Select Category</option>
+                                <option value="Groceries">Groceries</option>
+                                <option value="Transportation">Transportation</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Dining">Dining</option>
+                                <option value="Shopping">Shopping</option>
+                                <option value="Utilities">Utilities</option>
+                                <option value="Healthcare">Healthcare</option>
+                                <option value="Other">Other</option>
+                                <option value="write">Write Custom Category</option>
+                            </select>
+                            <input type="text" class="form-control mt-2" id="customCategory" placeholder="Enter custom category" style="display: none;">
+                        </div>
+                        <div class="mb-3">
+                            <label for="expenseDescription" class="form-label">Description</label>
+                            <input type="text" class="form-control" id="expenseDescription" placeholder="Enter expense description" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="expenseAmount" class="form-label">Amount (₹)</label>
+                            <input type="number" class="form-control" id="expenseAmount" placeholder="0.00" min="0" step="0.01" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addExpense()">
+                        <i class="fas fa-save me-2"></i>Save Expense
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Modal -->
+    <div class="modal fade" id="searchModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title"><i class="fas fa-search me-2"></i>Search Expenses</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="searchKeyword" class="form-label">Search by Keyword</label>
+                        <input type="text" class="form-control" id="searchKeyword" placeholder="Enter description or category">
+                    </div>
+                    <div class="mb-3">
+                        <label for="searchDate" class="form-label">Search by Date</label>
+                        <input type="date" class="form-control" id="searchDate">
+                    </div>
+                    <div class="mb-3">
+                        <label for="searchCategory" class="form-label">Search by Category</label>
+                        <select class="form-select" id="searchCategory">
+                            <option value="">All Categories</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-info" onclick="searchExpenses()">
+                        <i class="fas fa-search me-2"></i>Search
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Modal -->
+    <div class="modal fade" id="reportsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-chart-bar me-2"></i>Expense Reports</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs" id="reportTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="monthly-tab" data-bs-toggle="tab" data-bs-target="#monthly" type="button" role="tab">Monthly Report</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="category-tab" data-bs-toggle="tab" data-bs-target="#category" type="button" role="tab">Category Analysis</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="trend-tab" data-bs-toggle="tab" data-bs-target="#trend" type="button" role="tab">Trends</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content mt-3" id="reportTabContent">
+                        <div class="tab-pane fade show active" id="monthly" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Monthly Overview</h6>
+                                    <div id="monthlyStats"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <canvas id="monthlyChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="category" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <canvas id="categoryChart"></canvas>
+                                </div>
+                                <div class="col-md-6">
+                                    <div id="categoryBreakdown"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="trend" role="tabpanel">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+         <!-- Loan Management Modal -->
+     <div class="modal fade" id="loanModal" tabindex="-1">
+         <div class="modal-dialog modal-lg">
+             <div class="modal-content">
+                 <div class="modal-header bg-primary text-white">
+                     <h5 class="modal-title"><i class="fas fa-handshake me-2"></i>Loan Management</h5>
+                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                 </div>
+                 <div class="modal-body">
+                     <ul class="nav nav-tabs" id="loanTabs" role="tablist">
+                         <li class="nav-item" role="presentation">
+                             <button class="nav-link active" id="add-loan-tab" data-bs-toggle="tab" data-bs-target="#add-loan" type="button" role="tab">Add Loan</button>
+                         </li>
+                         <li class="nav-item" role="presentation">
+                             <button class="nav-link" id="view-loans-tab" data-bs-toggle="tab" data-bs-target="#view-loans" type="button" role="tab">View Loans</button>
+                         </li>
+                     </ul>
+                     <div class="tab-content mt-3" id="loanTabContent">
+                         <div class="tab-pane fade show active" id="add-loan" role="tabpanel">
+                             <form id="addLoanForm">
+                                 <div class="row">
+                                     <div class="col-md-6">
+                                         <div class="mb-3">
+                                             <label for="loanPerson" class="form-label">Person Name</label>
+                                             <input type="text" class="form-control" id="loanPerson" placeholder="Enter person name" required>
+                                         </div>
+                                     </div>
+                                     <div class="col-md-6">
+                                         <div class="mb-3">
+                                             <label for="loanAmount" class="form-label">Amount (₹)</label>
+                                             <input type="number" class="form-control" id="loanAmount" placeholder="0.00" min="0" step="0.01" required>
+                                         </div>
+                                     </div>
+                                 </div>
+                                 <div class="row">
+                                     <div class="col-md-6">
+                                         <div class="mb-3">
+                                             <label for="loanDate" class="form-label">Loan Date</label>
+                                             <input type="date" class="form-control" id="loanDate" required>
+                                         </div>
+                                     </div>
+                                     <div class="col-md-6">
+                                         <div class="mb-3">
+                                             <label for="loanType" class="form-label">Loan Type</label>
+                                             <select class="form-select" id="loanType" required>
+                                                 <option value="">Select Type</option>
+                                                 <option value="Given">Given (Udhar Diya)</option>
+                                                 <option value="Taken">Taken (Udhar Liya)</option>
+                                             </select>
+                                         </div>
+                                     </div>
+                                 </div>
+                                 <div class="mb-3">
+                                     <label for="loanDescription" class="form-label">Description</label>
+                                     <textarea class="form-control" id="loanDescription" rows="3" placeholder="Enter loan description (optional)"></textarea>
+                                 </div>
+                                 <div class="row">
+                                     <div class="col-md-6">
+                                         <div class="mb-3">
+                                             <label for="loanStatus" class="form-label">Status</label>
+                                             <select class="form-select" id="loanStatus" required>
+                                                 <option value="Active">Active (Not Returned)</option>
+                                                 <option value="Returned">Returned</option>
+                                                 <option value="Partial">Partially Returned</option>
+                                             </select>
+                                         </div>
+                                     </div>
+                                     <div class="col-md-6">
+                                         <div class="mb-3">
+                                             <label for="returnDate" class="form-label">Expected Return Date</label>
+                                             <input type="date" class="form-control" id="returnDate">
+                                         </div>
+                                     </div>
+                                 </div>
+                             </form>
+                         </div>
+                         <div class="tab-pane fade" id="view-loans" role="tabpanel">
+                             <div class="d-flex justify-content-between align-items-center mb-3">
+                                 <h6>All Loans</h6>
+                                 <div class="d-flex gap-2">
+                                     <select id="loanFilter" class="form-select form-select-sm" onchange="filterLoans()">
+                                         <option value="">All Types</option>
+                                         <option value="Given">Given</option>
+                                         <option value="Taken">Taken</option>
+                                     </select>
+                                     <select id="loanStatusFilter" class="form-select form-select-sm" onchange="filterLoans()">
+                                         <option value="">All Status</option>
+                                         <option value="Active">Active</option>
+                                         <option value="Returned">Returned</option>
+                                         <option value="Partial">Partial</option>
+                                     </select>
+                                 </div>
+                             </div>
+                             <div class="table-responsive">
+                                 <table class="table table-hover">
+                                     <thead class="table-dark">
+                                         <tr>
+                                             <th>Person</th>
+                                             <th>Type</th>
+                                             <th>Amount</th>
+                                             <th>Status</th>
+                                             <th>Date</th>
+                                             <th>Actions</th>
+                                         </tr>
+                                     </thead>
+                                     <tbody id="loansTableBody">
+                                         <tr>
+                                             <td colspan="6" class="text-center text-muted">
+                                                 <i class="fas fa-handshake fa-2x mb-2"></i><br>
+                                                 No loans recorded yet.
+                                             </td>
+                                         </tr>
+                                     </tbody>
+                                 </table>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+                 <div class="modal-footer">
+                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                     <button type="button" class="btn btn-primary" onclick="addLoan()">
+                         <i class="fas fa-save me-2"></i>Save Loan
+                     </button>
+                 </div>
+             </div>
+         </div>
+     </div>
+
+     <!-- Profile Modal -->
+     <div class="modal fade" id="profileModal" tabindex="-1">
+         <div class="modal-dialog">
+             <div class="modal-content">
+                 <div class="modal-header bg-info text-white">
+                     <h5 class="modal-title"><i class="fas fa-user me-2"></i>User Profile</h5>
+                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                 </div>
+                 <div class="modal-body">
+                     <form id="profileForm">
+                         <div class="mb-3 text-center">
+                             <div class="profile-photo-container mb-3">
+                                 <img id="profilePhotoPreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23e9ecef'/%3E%3Cpath d='M50 30c-8.284 0-15 6.716-15 15s6.716 15 15 15 15-6.716 15-15-6.716-15-15-15zm0 25c-5.514 0-10-4.486-10-10s4.486-10 10-10 10 4.486 10 10-4.486 10-10 10z' fill='%236c757d'/%3E%3C/svg%3E" alt="Profile Photo" class="profile-photo-preview">
+                             </div>
+                             <div class="mb-3">
+                                 <label for="profilePhoto" class="form-label">Profile Photo</label>
+                                 <input type="file" class="form-control" id="profilePhoto" accept="image/*" onchange="previewProfilePhoto()">
+                                 <small class="text-muted">Upload a profile photo (JPG, PNG, GIF)</small>
+                             </div>
+                         </div>
+                         <div class="mb-3">
+                             <label for="profileName" class="form-label">Name</label>
+                             <input type="text" class="form-control" id="profileName" placeholder="Enter your name" required>
+                         </div>
+                         <div class="mb-3">
+                             <label for="profilePhone" class="form-label">Phone Number (for SMS)</label>
+                             <input type="tel" class="form-control" id="profilePhone" placeholder="Enter your phone number" required>
+                         </div>
+                         <div class="mb-3">
+                             <label for="profileEmail" class="form-label">Email (for SMS)</label>
+                             <input type="email" class="form-control" id="profileEmail" placeholder="Enter your email (optional)">
+                         </div>
+                         <div class="mb-3">
+                             <label for="profileSms" class="form-label">SMS Notification</label>
+                             <select class="form-select" id="profileSms">
+                                 <option value="yes">Yes</option>
+                                 <option value="no">No</option>
+                             </select>
+                         </div>
+                         <div class="mb-3">
+                             <label for="profileExport" class="form-label">Export Data</label>
+                             <select class="form-select" id="profileExport">
+                                 <option value="yes">Yes</option>
+                                 <option value="no">No</option>
+                             </select>
+                         </div>
+                     </form>
+                 </div>
+                 <div class="modal-footer">
+                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                     <button type="button" class="btn btn-info" onclick="saveProfile()">
+                         <i class="fas fa-save me-2"></i>Save Profile
+                     </button>
+                 </div>
+             </div>
+         </div>
+     </div>
+
+     <!-- Selective Export Modal -->
+     <div class="modal fade" id="selectiveExportModal" tabindex="-1">
+         <div class="modal-dialog modal-lg">
+             <div class="modal-content">
+                 <div class="modal-header bg-success text-white">
+                     <h5 class="modal-title"><i class="fas fa-download me-2"></i>Selective Export</h5>
+                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                 </div>
+                 <div class="modal-body">
+                     <div class="row mb-3">
+                         <div class="col-md-6">
+                             <div class="form-check">
+                                 <input class="form-check-input" type="checkbox" id="selectAllExpenses" onchange="toggleAllExpenses()">
+                                 <label class="form-check-label" for="selectAllExpenses">
+                                     <strong>Select All Expenses</strong>
+                                 </label>
+                             </div>
+                         </div>
+                         <div class="col-md-6">
+                             <div class="form-check">
+                                 <input class="form-check-input" type="checkbox" id="selectAllLoans" onchange="toggleAllLoans()">
+                                 <label class="form-check-label" for="selectAllLoans">
+                                     <strong>Select All Loans</strong>
+                                 </label>
+                             </div>
+                         </div>
+                     </div>
+                     
+                     <ul class="nav nav-tabs" id="exportTabs" role="tablist">
+                         <li class="nav-item" role="presentation">
+                             <button class="nav-link active" id="expenses-export-tab" data-bs-toggle="tab" data-bs-target="#expenses-export" type="button" role="tab">Expenses</button>
+                         </li>
+                         <li class="nav-item" role="presentation">
+                             <button class="nav-link" id="loans-export-tab" data-bs-toggle="tab" data-bs-target="#loans-export" type="button" role="tab">Loans</button>
+                         </li>
+                     </ul>
+                     
+                     <div class="tab-content mt-3" id="exportTabContent">
+                         <div class="tab-pane fade show active" id="expenses-export" role="tabpanel">
+                             <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                                 <table class="table table-sm">
+                                     <thead class="table-dark sticky-top">
+                                         <tr>
+                                             <th width="50">Select</th>
+                                             <th>Date</th>
+                                             <th>Category</th>
+                                             <th>Description</th>
+                                             <th>Amount</th>
+                                         </tr>
+                                     </thead>
+                                     <tbody id="exportExpensesTable">
+                                         <!-- Will be populated by JavaScript -->
+                                     </tbody>
+                                 </table>
+                             </div>
+                         </div>
+                         <div class="tab-pane fade" id="loans-export" role="tabpanel">
+                             <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                                 <table class="table table-sm">
+                                     <thead class="table-dark sticky-top">
+                                         <tr>
+                                             <th width="50">Select</th>
+                                             <th>Person</th>
+                                             <th>Type</th>
+                                             <th>Amount</th>
+                                             <th>Status</th>
+                                             <th>Date</th>
+                                         </tr>
+                                     </thead>
+                                     <tbody id="exportLoansTable">
+                                         <!-- Will be populated by JavaScript -->
+                                     </tbody>
+                                 </table>
+                             </div>
+                         </div>
+                     </div>
+                     
+                     <div class="alert alert-info mt-3">
+                         <i class="fas fa-info-circle me-2"></i>
+                         Select the entries you want to export. You can export expenses, loans, or both.
+                     </div>
+                 </div>
+                 <div class="modal-footer">
+                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                     <button type="button" class="btn btn-success" onclick="exportSelectedData()">
+                         <i class="fas fa-download me-2"></i>Export Selected
+                     </button>
+                 </div>
+             </div>
+         </div>
+     </div>
+
+     <!-- Bill Upload Modal -->
+     <div class="modal fade" id="billUploadModal" tabindex="-1">
+         <div class="modal-dialog">
+             <div class="modal-content">
+                 <div class="modal-header bg-warning text-dark">
+                     <h5 class="modal-title"><i class="fas fa-file-upload me-2"></i>Upload Bill</h5>
+                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                 </div>
+                 <div class="modal-body">
+                     <div class="mb-3">
+                         <label for="billImage" class="form-label">Select Bill Image</label>
+                         <input type="file" class="form-control" id="billImage" accept="image/*" onchange="previewBillImage()">
+                         <div class="form-text">Supported formats: JPG, PNG, GIF (Max size: 5MB)</div>
+                     </div>
+                     <div class="mb-3" id="billPreviewContainer" style="display: none;">
+                         <label class="form-label">Bill Preview</label>
+                         <div class="text-center">
+                             <img id="billPreview" class="img-fluid rounded border" style="max-height: 300px;">
+                         </div>
+                     </div>
+                     <div class="mb-3">
+                         <label for="billDate" class="form-label">Bill Date</label>
+                         <input type="date" class="form-control" id="billDate" required>
+                     </div>
+                     <div class="mb-3">
+                         <label for="billAmount" class="form-label">Bill Amount (₹)</label>
+                         <input type="number" class="form-control" id="billAmount" placeholder="0.00" min="0" step="0.01" required>
+                     </div>
+                     <div class="mb-3">
+                         <label for="billDescription" class="form-label">Description</label>
+                         <input type="text" class="form-control" id="billDescription" placeholder="Enter bill description" required>
+                     </div>
+                     <div class="mb-3">
+                         <label for="billCategory" class="form-label">Category</label>
+                         <select class="form-select" id="billCategory" required>
+                             <option value="">Select Category</option>
+                             <option value="Groceries">Groceries</option>
+                             <option value="Transportation">Transportation</option>
+                             <option value="Entertainment">Entertainment</option>
+                             <option value="Dining">Dining</option>
+                             <option value="Shopping">Shopping</option>
+                             <option value="Utilities">Utilities</option>
+                             <option value="Healthcare">Healthcare</option>
+                             <option value="Other">Other</option>
+                         </select>
+                     </div>
+                 </div>
+                 <div class="modal-footer">
+                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                     <button type="button" class="btn btn-warning" onclick="saveBillExpense()">
+                         <i class="fas fa-save me-2"></i>Save Bill Expense
+                     </button>
+                 </div>
+             </div>
+         </div>
+     </div>
+
+     <!-- Bill View Modal -->
+     <div class="modal fade" id="billViewModal" tabindex="-1">
+         <div class="modal-dialog modal-lg">
+             <div class="modal-content">
+                 <div class="modal-header bg-info text-white">
+                     <h5 class="modal-title"><i class="fas fa-file-image me-2"></i>Bill Image</h5>
+                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                 </div>
+                 <div class="modal-body text-center">
+                     <img id="billViewImage" class="img-fluid rounded" style="max-height: 500px;">
+                 </div>
+                 <div class="modal-footer">
+                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                 </div>
+             </div>
+         </div>
+     </div>
+
+     <!-- Bootstrap JS -->
+     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+     <!-- Custom JS -->
+     <script src="script.js"></script>
+ </body>
+</html> 
