@@ -198,4 +198,8 @@ For questions or support, please check the code comments or create an issue in t
 
 ---
 
+##Demo Image 
+<img width="1890" height="912" alt="Screenshot 2025-08-14 182754" src="https://github.com/user-attachments/assets/5a162eb1-de43-4a01-81d8-e33aac384473" />
+<img width="1896" height="921" alt="Screenshot 2025-08-14 183632" src="https://github.com/user-attachments/assets/91b94660-c4e1-4e7c-991f-776f1989b405" />
+
 **Happy Expense Tracking! 💰📊** 
